@@ -210,7 +210,7 @@ namespace Big_Integers
         }
         public NumarMare Normalize()
         {
-            string str = "";
+            StringBuilder str = new StringBuilder();
             bool started = false;
             for(int i = 0; i < cifre.Length; i++)
             {
@@ -222,9 +222,9 @@ namespace Big_Integers
                 {
                     started = true;
                 }
-                str = str + cifrereversed[i].ToString();
+                str.Append(cifrereversed[i]);
             }
-            NumarMare rev = new NumarMare(str);
+            NumarMare rev = new NumarMare(str.ToString());
             return rev;
         } 
         public override string ToString()
