@@ -266,13 +266,33 @@ namespace Big_Integers
             }
             return LeftAux;
         }
-        //public static NumarMare operator %(NumarMare left, NumarMare right)
-        //{
-
-        //}
+        public static NumarMare operator %(NumarMare left, NumarMare right)
+        {
+            NumarMare LeftAux;
+            NumarMare RightAux;
+            if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)
+            {
+                return (right.Abs() % left.Abs()).Neg();
+            }
+            if (left.IsNegative && right.IsNegative)
+            {
+                return right.Abs() % left.Abs();
+            }
+            if (left.cifre.Length < right.cifre.Length)
+            {
+                return left;
+            }
+            LeftAux = left;
+            RightAux = right;
+            while (LeftAux - RightAux >= ZERO)
+            {
+                LeftAux = LeftAux - RightAux;
+            }
+            return LeftAux;
+        }
         public static NumarMare operator /(NumarMare left, NumarMare right)
         {
-            NumarMare aux;
+            NumarMare aux = ZERO;
             NumarMare LeftAux;
             NumarMare RightAux;
             if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)
@@ -289,11 +309,12 @@ namespace Big_Integers
             }
             LeftAux = left;
             RightAux = right;
-            while ( LeftAux - RightAux > ZERO)
+            while ( LeftAux - RightAux >= ZERO)
             {
-                return ZERO;
+                LeftAux = LeftAux - RightAux;
+                aux += ONE;
             }
-            return ZERO;
+            return aux;
         }
         /// <summary>
         /// Functia exponentiala a unei instante de NumarMare.
@@ -314,8 +335,6 @@ namespace Big_Integers
             }
             return aux;
         }
-
-
         public static bool operator >(NumarMare left, NumarMare right)
         {
             if(left.IsNegative && !right.IsNegative)
@@ -506,7 +525,7 @@ namespace Big_Integers
     {
         static void Main(string[] args)
         {
-            NumarMare a = new NumarMare("120");
+            NumarMare a = new NumarMare("290");
             NumarMare b = new NumarMare("120");
             //Console.WriteLine(a.ToString());
             //Console.WriteLine(a > b);
@@ -524,7 +543,9 @@ namespace Big_Integers
             //a = new NumarMare("1000");
             //b = new NumarMare("100000");
             Console.WriteLine(a * b);
-            Console.WriteLine(a.Pow(50));
+            Console.WriteLine(a.Pow(2));
+            Console.WriteLine(a / b);
+            Console.WriteLine(a % b);
 
         }
     }
