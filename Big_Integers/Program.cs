@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace Big_Integers
 {
-    public struct NumarMare
+    public readonly struct NumarMare
     {
-        public char[] cifre; // atribut 1 : cifrele ca caractere
-        public int[] cifreint; // atribut 2 : cifrele ca int
-        public int[] cifrereversed; // atribut 3 : cifrele ca int in ordine inversa pentru efectuarea calculelor
-        public bool IsNegative;
+        readonly char[] cifre; // atribut 1 : cifrele ca caractere
+         readonly int[] cifreint; // atribut 2 : cifrele ca int
+        readonly int[] cifrereversed; // atribut 3 : cifrele ca int in ordine inversa pentru efectuarea calculelor
+         readonly bool IsNegative;
         public NumarMare(string s)
         {
             IsNegative= false;
@@ -53,21 +53,25 @@ namespace Big_Integers
         public static NumarMare operator +(NumarMare left, NumarMare right)
         {
             int additionlength;
-            bool operationSemn = false;
+            bool operationNeg = false;
             NumarMare aux;
-            if ((left.IsNegative && !right.IsNegative) || (!left.IsNegative && right.IsNegative))
-            {
-                return (left - right);
-            }
-            if(left.IsNegative && right.IsNegative)
-            {
-                operationSemn = true;
-            }
-            if (left < right)
+            if (left.cifre.Length < right.cifre.Length)
             {
                 aux = left;
                 left = right;
                 right = aux;
+            }
+            if (left.IsNegative && !right.IsNegative)
+            {
+                return (right.Abs() - left.Abs());
+            }
+            if(!left.IsNegative && right.IsNegative)
+            {
+                return (left.Abs() - right.Abs());
+            }
+            if(left.IsNegative && right.IsNegative)
+            {
+                operationNeg = true;
             }
             additionlength = left.cifre.Length;
             additionlength++;
@@ -78,7 +82,7 @@ namespace Big_Integers
                 additionlength--;
             }
             NumarMare add = new NumarMare(str.ToString());
-            for (int i = 0; i < add.cifre.Length - 1; i++)
+            for (int i = 0; i < add.cifre.Length - 1 ; i++)
             {
                 if(i >= right.cifre.Length)
                 {
@@ -109,7 +113,7 @@ namespace Big_Integers
             //}
             //Console.WriteLine(str.ToString());
             add = add.Normalize();
-            if (operationSemn)
+            if (operationNeg)
             {
                 str = new StringBuilder();
                 str.Append('-');
@@ -120,15 +124,45 @@ namespace Big_Integers
         }
         public static NumarMare operator -(NumarMare left, NumarMare right)
         {
-            NumarMare aux;
-            
+           // bool operationNeg = false;
+            int subslength = left.cifre.Length;
+            if (left.cifre.Length < right.cifre.Length)
+            {
+                if (left.IsNegative && !right.IsNegative)
+                {
+                    return (right + left.Abs()).Neg();
+                }
+                if (!left.IsNegative && right.IsNegative)
+                {
+                    return left + right.Abs();
+                }
+                if (left.IsNegative && right.IsNegative)
+                {
+                    return right.Abs() - left.Abs();
+                }
+                if (!left.IsNegative && !right.IsNegative)
+                {
+                    return (right - left).Neg();
+                }
+                subslength = right.cifre.Length;
+            }
             if (left < right)
             {
-                aux = left;
-                left = right;
-                right = aux;
+                return (right - left).Neg();
             }
-            int subslength = left.cifre.Length;
+            if ( left.IsNegative && !right.IsNegative )
+            {
+                return (left.Abs() + right).Neg();
+            }
+            if ( !left.IsNegative && right.IsNegative )
+            {
+                return left + right.Abs();
+            }
+            if ( left.IsNegative && right.IsNegative )
+            {
+                return (left.Abs() - right.Abs()).Neg();
+            }
+            
             StringBuilder str = new StringBuilder();
             while (subslength > 0)
             {
@@ -137,28 +171,32 @@ namespace Big_Integers
             }
             NumarMare subs = new NumarMare(str.ToString());
             //Console.WriteLine(subs);
-            for (int i = 0; i < subs.cifre.Length - 1; i++)
+            for (int i = 0; i < subs.cifre.Length; i++)
             {
+                
                 if (i >= right.cifre.Length)
                 {
                     subs.cifrereversed[i] += left.cifrereversed[i];
+                    if (subs.cifrereversed[i] < 0)
+                    {
+                        subs.cifrereversed[i] += 10;
+                    }
                     continue;
                 }
                 subs.cifrereversed[i] += left.cifrereversed[i] - right.cifrereversed[i];
                 if (subs.cifrereversed[i] < 0)
-                {
+                { 
                     subs.cifrereversed[i] += 10;
-                    int borrow = 1;
                     for(int j = i + 1; j < left.cifre.Length; j++)
                     {
-                        left.cifrereversed[j] -= 1;
-                        if (left.cifrereversed[j] < 0)
+                        if (left.cifrereversed[j] - 1 < 0)
                         {
-                            left.cifrereversed[j] += 10;
+                            subs.cifrereversed[j] -= 1;
                             continue;
                         }
-                        if (left.cifrereversed[j] >= 0)
-                        {
+                        if (left.cifrereversed[j] - 1 >= 0) 
+                        { 
+                            subs.cifrereversed[j] -= 1;
                             break;
                         }
                     }
@@ -174,15 +212,29 @@ namespace Big_Integers
             //{
             //    Console.Write(subs.cifrereversed[i]);
             //}
-            //Console.WriteLine("c"+str.ToString());
+            //Console.WriteLine("c" + str.ToString());
             //Console.WriteLine();
             subs = new NumarMare(str.ToString());
             subs = subs.Normalize();
+            //if (operationNeg)
+            //{
+            //    str = new StringBuilder();
+            //    str.Append('-');
+            //    str.Append(subs.ToString());
+            //    subs = new NumarMare(str.ToString());
+            //}
             return subs;
         }
         //public static NumarMare operator *(NumarMare left, NumarMare right)
         //{
-
+        //    NumarMare aux;
+        //    if (left.cifre.Length < right.cifre.Length)
+        //    {
+        //        aux = left;
+        //        left = right;
+        //        right = aux;
+        //    }
+        //    while(right > )
         //}
         //public static NumarMare operator /(NumarMare left, NumarMare right)
         //{
@@ -198,15 +250,15 @@ namespace Big_Integers
         {
             if(left.IsNegative && !right.IsNegative)
             {
-                return true;
+                return false;
             }
             if (!left.IsNegative && right.IsNegative)
             {
-                return false;
+                return true;
             }
             if (left.IsNegative && right.IsNegative)
             {
-                return !(new NumarMare(left.ToString().Remove(0,1)) > new NumarMare(right.ToString().Remove(0, 1)));
+                return !(left.Abs() >= right.Abs());
             }
             if (left.cifre.Length > right.cifre.Length)
             {
@@ -235,22 +287,22 @@ namespace Big_Integers
         }
         public static bool operator <(NumarMare left, NumarMare right)
         {
-            if (left > right) return false;
+            if (left >= right) return false;
             else return true;
         }
         public static bool operator >=(NumarMare left, NumarMare right)
         {
             if (left.IsNegative && !right.IsNegative)
             {
-                return true;
+                return false;
             }
             if (!left.IsNegative && right.IsNegative)
             {
-                return false;
+                return true;
             }
             if (left.IsNegative && right.IsNegative)
             {
-                return !(new NumarMare(left.ToString().Remove(0, 1)) >= new NumarMare(right.ToString().Remove(0, 1)));
+                return !(left.Abs() > right.Abs());
             }
             if (left.cifre.Length > right.cifre.Length)
             {
@@ -312,13 +364,31 @@ namespace Big_Integers
         {
             return this.ToString().GetHashCode();
         }
+        public NumarMare Abs()
+        {
+            string s = this.ToString();
+            if (s.Contains('-'))
+            {
+                s = s.Remove(0, 1);
+            }
+            NumarMare abs = new NumarMare(s);
+            return abs;
+        }
+        public NumarMare Neg()
+        {
+            StringBuilder str = new StringBuilder();
+            str.Append("-");
+            str.Append(this.Abs().ToString());
+            NumarMare neg = new NumarMare(str.ToString());
+            return neg;
+        }
         public NumarMare Normalize()
         {
             StringBuilder str = new StringBuilder();
             bool started = false;
             for(int i = 0; i < cifre.Length; i++)
             {
-                if (cifrereversed[i] == 0 && !started)
+                if ((cifrereversed[i] == 0 ) && !started)
                 {
                     continue;
                 }
@@ -350,25 +420,24 @@ namespace Big_Integers
     {
         static void Main(string[] args)
         {
-            NumarMare a = new NumarMare("-1000000");
-
-            //for(int i = 0; i < 4; i++)
-            //{
-            //    Console.Write(a.cifre[i]);
-            //}
-            //for (int i = 0; i < 4; i++)
-            //{
-            //    Console.Write(a.cifreint[i]);
-            //}
-
-            NumarMare b = new NumarMare("-687678");
+            NumarMare a = new NumarMare("1000");
+            NumarMare b = new NumarMare("1001");
             //Console.WriteLine(a.ToString());
-            Console.WriteLine(a > b);
+            //Console.WriteLine(a > b);
             //Console.WriteLine(a >= b);
+            //Console.WriteLine(a < b);
+            //Console.WriteLine(a <= b);
             //Console.WriteLine(a.Equals(new NumarMare("1013")));
-            //Console.WriteLine(a + b);
-            Console.WriteLine(a+b);
-            
+            Console.WriteLine(a);
+            Console.WriteLine(b);
+            Console.WriteLine(a + b);
+            Console.WriteLine(b + a);
+
+            Console.WriteLine(b - a);
+            Console.WriteLine(a - b);
+            //a = new NumarMare("1000");
+            //b = new NumarMare("100000");
+
         }
     }
 }
