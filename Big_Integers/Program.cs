@@ -3,6 +3,7 @@ using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,9 +12,12 @@ namespace Big_Integers
     public readonly struct NumarMare
     {
         readonly char[] cifre; // atribut 1 : cifrele ca caractere
-         readonly int[] cifreint; // atribut 2 : cifrele ca int
+        readonly int[] cifreint; // atribut 2 : cifrele ca int
         readonly int[] cifrereversed; // atribut 3 : cifrele ca int in ordine inversa pentru efectuarea calculelor
-         readonly bool IsNegative;
+        readonly bool IsNegative;
+        public static NumarMare ZERO = new NumarMare("0");
+        public static NumarMare ONE = new NumarMare("1");
+        public static NumarMare NULL = new NumarMare("");
         public NumarMare(string s)
         {
             IsNegative= false;
@@ -223,27 +227,93 @@ namespace Big_Integers
             //    str.Append(subs.ToString());
             //    subs = new NumarMare(str.ToString());
             //}
+            if (subs == NULL)
+            {
+                return ZERO;
+            }
             return subs;
         }
-        //public static NumarMare operator *(NumarMare left, NumarMare right)
-        //{
-        //    NumarMare aux;
-        //    if (left.cifre.Length < right.cifre.Length)
-        //    {
-        //        aux = left;
-        //        left = right;
-        //        right = aux;
-        //    }
-        //    while(right > )
-        //}
-        //public static NumarMare operator /(NumarMare left, NumarMare right)
+        public static NumarMare operator *(NumarMare left, NumarMare right)
+        {
+            NumarMare ONE = new NumarMare("1");
+            NumarMare aux;
+            NumarMare LeftAux;
+            NumarMare RightAux;
+            if(left == ZERO || right == ZERO)
+            {
+                return ZERO;
+            }
+            if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)
+            {
+                return (right.Abs() * left.Abs()).Neg();
+            }
+            if (left.IsNegative && right.IsNegative)
+            {
+                return right.Abs() * left.Abs();
+            }
+            if (left.cifre.Length < right.cifre.Length)
+            {
+                aux = left;
+                left = right;
+                right = aux;
+            }
+            LeftAux = left;
+            RightAux = right;
+            while (RightAux > ONE)
+            {
+                LeftAux += left;
+                RightAux -= ONE;
+            }
+            return LeftAux;
+        }
+        //public static NumarMare operator %(NumarMare left, NumarMare right)
         //{
 
         //}
-        //public static NumarMare Pow(NumarMare base, int exp)
-        //{
-
-        //}
+        public static NumarMare operator /(NumarMare left, NumarMare right)
+        {
+            NumarMare aux;
+            NumarMare LeftAux;
+            NumarMare RightAux;
+            if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)
+            {
+                return (right.Abs() / left.Abs()).Neg();
+            }
+            if (left.IsNegative && right.IsNegative)
+            {
+                return right.Abs() / left.Abs();
+            }
+            if (left.cifre.Length < right.cifre.Length)
+            {
+                return ZERO;
+            }
+            LeftAux = left;
+            RightAux = right;
+            while ( LeftAux - RightAux > ZERO)
+            {
+                return ZERO;
+            }
+            return ZERO;
+        }
+        /// <summary>
+        /// Functia exponentiala a unei instante de NumarMare.
+        /// </summary>
+        /// <param name="exp">Exponent</param>
+        /// <returns>Un NumarMare ridicat la puterea EXP</returns>
+        public NumarMare Pow(int exp)
+        {
+            if(this == ZERO)
+            {
+                return ONE;
+            }
+            NumarMare aux;
+            aux = this;
+            for(int i = 1; i < exp; i++)
+            {
+                aux = aux * this;
+            }
+            return aux;
+        }
 
 
         public static bool operator >(NumarMare left, NumarMare right)
@@ -364,6 +434,10 @@ namespace Big_Integers
         {
             return this.ToString().GetHashCode();
         }
+        /// <summary>
+        /// Valoarea absoluta
+        /// </summary>
+        /// <returns>Valoarea absoluta al unui Numar Mare</returns>
         public NumarMare Abs()
         {
             string s = this.ToString();
@@ -374,6 +448,10 @@ namespace Big_Integers
             NumarMare abs = new NumarMare(s);
             return abs;
         }
+        /// <summary>
+        /// Valoarea negativa al unui NumarMare.
+        /// </summary>
+        /// <returns>Valoarea negative al unui NumarMare indiferent de semn</returns>
         public NumarMare Neg()
         {
             StringBuilder str = new StringBuilder();
@@ -382,6 +460,10 @@ namespace Big_Integers
             NumarMare neg = new NumarMare(str.ToString());
             return neg;
         }
+        /// <summary>
+        /// Se foloseste in cazul operatiilor de adunare sau scadere pentru a elimina 0-uri nesemnificative din numar.
+        /// </summary>
+        /// <returns>Numarul fara 0-uri nesemnificative in fata, in urma unei operatii de adunare sau scadere.</returns>
         public NumarMare Normalize()
         {
             StringBuilder str = new StringBuilder();
@@ -401,6 +483,10 @@ namespace Big_Integers
             NumarMare rev = new NumarMare(str.ToString());
             return rev;
         } 
+        /// <summary>
+        /// Converts a NumarMare object to a string.
+        /// </summary>
+        /// <returns>The number as a string.</returns>
         public override string ToString()
         {
             StringBuilder str = new StringBuilder();
@@ -420,8 +506,8 @@ namespace Big_Integers
     {
         static void Main(string[] args)
         {
-            NumarMare a = new NumarMare("1000");
-            NumarMare b = new NumarMare("1001");
+            NumarMare a = new NumarMare("120");
+            NumarMare b = new NumarMare("120");
             //Console.WriteLine(a.ToString());
             //Console.WriteLine(a > b);
             //Console.WriteLine(a >= b);
@@ -437,6 +523,8 @@ namespace Big_Integers
             Console.WriteLine(a - b);
             //a = new NumarMare("1000");
             //b = new NumarMare("100000");
+            Console.WriteLine(a * b);
+            Console.WriteLine(a.Pow(50));
 
         }
     }
