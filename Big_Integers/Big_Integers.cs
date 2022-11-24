@@ -233,33 +233,32 @@ namespace Big_Integers
         }
         public static NumarMare operator *(NumarMare left, NumarMare right)
         {
-            NumarMare ONE = new NumarMare("1");
             NumarMare aux;
             NumarMare LeftAux;
             NumarMare RightAux;
-            if (left == ZERO || right == ZERO)
+            if (left == ZERO || right == ZERO)       // 0 * a = 0, oricare a 
             {
                 return ZERO;
             }
-            if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)
+            if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)    // pentru semn
             {
-                return (right.Abs() * left.Abs()).Neg();
+                return (right.Abs() * left.Abs()).Neg();                  // -a * b = a * -b = -( |-a| * |-b| )
             }
             if (left.IsNegative && right.IsNegative)
             {
-                return right.Abs() * left.Abs();
+                return right.Abs() * left.Abs();                         // -a * -b = |-a| * |-b|
             }
-            if (left.cifre.Length < right.cifre.Length)
+            if (left.cifre.Length < right.cifre.Length)                 // inmultirea este comutative
             {
                 aux = left;
                 left = right;
                 right = aux;
-            }
+            }                                                           // cu cele auxiliare sa nu cumva sa se intample ceva cu cele originale ( am avut conflicte la scadere )
             LeftAux = left;
             RightAux = right;
-            while (RightAux > ONE)
+            while (RightAux > ONE)                        // posibil cea mai lenesa modalitate de inmultire dar poate il fac in viitor
             {
-                LeftAux += left;
+                LeftAux += left;                         // a * b = a + a + a + ... + a de b ori, ( in cazul nostru b ii mai mic pentru eficienta )
                 RightAux -= ONE;
             }
             return LeftAux;
@@ -268,7 +267,7 @@ namespace Big_Integers
         {
             NumarMare LeftAux;
             NumarMare RightAux;
-            if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)
+            if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)      // la fel ca la inmultire
             {
                 return (right.Abs() % left.Abs()).Neg();
             }
@@ -276,40 +275,40 @@ namespace Big_Integers
             {
                 return right.Abs() % left.Abs();
             }
-            if (left.cifre.Length < right.cifre.Length)
+            if (left.cifre.Length < right.cifre.Length)          // daca q = 0 , r = left.
             {
                 return left;
             }
             LeftAux = left;
             RightAux = right;
-            while (LeftAux - RightAux >= ZERO)
+            while (LeftAux - RightAux >= ZERO)                 // iar o rezolvare lenesa , impartire prin scadere.
             {
-                LeftAux = LeftAux - RightAux;
+                LeftAux = LeftAux - RightAux;                  // se scade pana cand ajunge la 0, si ramane restul
             }
             return LeftAux;
         }
         public static NumarMare operator /(NumarMare left, NumarMare right)
         {
-            NumarMare aux = ZERO;
+            NumarMare aux = ZERO;  // contor, adica catul operatiei.
             NumarMare LeftAux;
             NumarMare RightAux;
-            if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)
-            {
+            if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)      // la fel ca la inmultire
+            { 
                 return (right.Abs() / left.Abs()).Neg();
             }
             if (left.IsNegative && right.IsNegative)
             {
                 return right.Abs() / left.Abs();
             }
-            if (left.cifre.Length < right.cifre.Length)
+            if (left.cifre.Length < right.cifre.Length)                // daca nu se poate imparti atunci q = 0 
             {
                 return ZERO;
             }
             LeftAux = left;
             RightAux = right;
-            while (LeftAux - RightAux >= ZERO)
+            while (LeftAux - RightAux >= ZERO)                   // metoda lenesa, impartire prin scadere repetitive si incrementare contor
             {
-                LeftAux = LeftAux - RightAux;
+                LeftAux = LeftAux - RightAux;                    // left - ( right + right + ... + right ) - de q ori.
                 aux += ONE;
             }
             return aux;
