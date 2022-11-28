@@ -13,10 +13,12 @@ namespace Big_Integers
     {
         static void Main(string[] args)
         {
-            NumarMare a = new NumarMare("256");
-            NumarMare b = new NumarMare("257");
+            NumarMare a = new NumarMare("6");
+            NumarMare b = new NumarMare("-9");
+            NumarMare f = new NumarMare("20");
+            NumarMare f2 = new NumarMare("18");
             //Console.WriteLine(a.ToString());
-            //Console.WriteLine(a > b);
+            //Console.WriteLine(f > f2);
             //Console.WriteLine(a >= b);
             //Console.WriteLine(a < b);
             //Console.WriteLine(a <= b);
@@ -27,12 +29,15 @@ namespace Big_Integers
             Console.WriteLine(b + a);
             Console.WriteLine(b - a);
             Console.WriteLine(a - b);
-            Console.WriteLine(a * b);
-            Console.WriteLine(a.Pow(2));
+            //Console.WriteLine(b.Pow(2));
+            //Console.WriteLine(a.Pow(2));
+           // Console.WriteLine(a.SimpleDiv(b));
             Console.WriteLine(a / b);
+           // Console.WriteLine(f - f2);
             Console.WriteLine(a % b);
-            Console.WriteLine(NumarMare.Factorial(123));
-            Console.WriteLine(b.Sqrt());
+            //Console.WriteLine(b.Pow(253));
+           // Console.WriteLine(b.Sqrt());
         }
+        
     }
 }

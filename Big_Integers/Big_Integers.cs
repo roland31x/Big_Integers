@@ -14,9 +14,11 @@ namespace Big_Integers
         readonly bool IsNegative;
         public static NumarMare ZERO = new NumarMare("0");
         public static NumarMare ONE = new NumarMare("1");
+        public static NumarMare TEN = new NumarMare("10");
         public static NumarMare NULL = new NumarMare("");
         public NumarMare(string s)
         {
+            //s = IsValid(s);
             IsNegative = false;          // implicit pozitiv
             if (s.Contains('-'))         // flag-ul pentru nr negativ
             {
@@ -52,6 +54,25 @@ namespace Big_Integers
             // STERGE ASTEA CAND MERGE 100%
 
         }
+        public static string IsValid(string a)
+        {
+            char[] ok = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-' };
+            char[] toTest = a.ToCharArray(); 
+            for(int i = 0; i < a.Length; i++)
+            {
+                if (ok.Contains(toTest[i]))
+                {
+                    continue;
+                }
+                else
+                {
+                    Console.WriteLine($"'{a}' este un nr introdus cu caractere incorecte, v-a fi setat implicit la 0.");
+                    return "0";                    
+                }
+            }
+            return a;
+        }
+
         public static NumarMare operator +(NumarMare left, NumarMare right)
         {
             int additionlength;
@@ -191,12 +212,7 @@ namespace Big_Integers
                     subs.cifrereversed[i] += 10;
                     for (int j = i + 1; j < left.cifre.Length; j++)                        // algoritm pentru borrow pana cand e posibil, in cazul 100000 - 1, parcurge toate cifrele pana cand gaseste un borrow.
                     {
-                        if (left.cifrereversed[j] - 1 < 0)
-                        {
-                            subs.cifrereversed[j] -= 1;
-                            continue;
-                        }
-                        if (left.cifrereversed[j] - 1 >= 0)
+                        if (true)
                         {
                             subs.cifrereversed[j] -= 1;
                             break;
@@ -253,20 +269,49 @@ namespace Big_Integers
                 aux = left;
                 left = right;
                 right = aux;
-            }                                                           // cu cele auxiliare sa nu cumva sa se intample ceva cu cele originale ( am avut conflicte la scadere )
-            LeftAux = left;
-            RightAux = right;
-            while (RightAux > ONE)                        // posibil cea mai lenesa modalitate de inmultire dar poate il fac in viitor
-            {
-                LeftAux += left;                         // a * b = a + a + a + ... + a de b ori, ( in cazul nostru b ii mai mic pentru eficienta )
-                RightAux -= ONE;
             }
-            return LeftAux;
+
+            int prodhelper = right.cifre.Length + left.cifre.Length;
+            StringBuilder str = new StringBuilder();
+            while (prodhelper > 0)
+            {
+                str.Append("0");
+                prodhelper--;
+            }
+            NumarMare prod = new NumarMare(str.ToString());
+            for (int i = 0; i < right.cifre.Length; i++)
+            {
+                for (int j = 0; j < left.cifre.Length; j++)
+                {
+                    prod.cifrereversed[j + i] += right.cifrereversed[i] * left.cifrereversed[j];
+                    if (prod.cifrereversed[j + i] >= 10)
+                    {
+                        prod.cifrereversed[j + i + 1] += prod.cifrereversed[j + i] / 10;
+                        prod.cifrereversed[j + i] = prod.cifrereversed[j + i] % 10;
+                    }
+                }
+            }
+            // normalizare speciala
+            str = new StringBuilder();
+            bool nrstarted = false;
+            for (int i = 1; i <= prod.cifre.Length; i++)
+            {
+                if (prod.cifrereversed[prod.cifre.Length - i] == 0 && !nrstarted)
+                {
+                    continue;
+                }
+                if (prod.cifrereversed[prod.cifre.Length - i] != 0)
+                {
+                    nrstarted = true;
+                }
+                str.Append(prod.cifrereversed[prod.cifre.Length - i]);
+            }
+            prod = new NumarMare(str.ToString());
+            //prod = prod.Normalize();
+            return prod;          
         }
         public static NumarMare operator %(NumarMare left, NumarMare right)
         {
-            NumarMare LeftAux;
-            NumarMare RightAux;
             if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)      // la fel ca la inmultire
             {
                 return (right.Abs() % left.Abs()).Neg();
@@ -279,19 +324,57 @@ namespace Big_Integers
             {
                 return left;
             }
-            LeftAux = left;
-            RightAux = right;
-            while (LeftAux - RightAux >= ZERO)                 // iar o rezolvare lenesa , impartire prin scadere.
+            if (left < right)
             {
-                LeftAux = LeftAux - RightAux;                  // se scade pana cand ajunge la 0, si ramane restul
+                return left;
             }
-            return LeftAux;
+            NumarMare rez = ZERO;
+            NumarMare dividend = ONE;
+            int divhelper = right.cifre.Length;
+
+            rez *= TEN;
+            bool firstdivdone = false;
+            int divlength = right.cifre.Length;
+            NumarMare laux = left;
+            NumarMare rezhelper = ZERO;
+            StringBuilder str = new StringBuilder();
+            if (!firstdivdone)
+            {
+                for (int i = 0; i < divlength; i++)
+                {
+                    str.Append(laux.cifreint[i]);
+                }
+                dividend = new NumarMare(str.ToString());
+                firstdivdone = true;
+                //Console.WriteLine(dividend + "start");
+            }
+            while (divhelper <= left.cifre.Length)
+            {
+                rezhelper = dividend.SimpleDiv(right);
+                rez += rezhelper;
+                //Console.WriteLine(dividend + "prediv");
+                //Console.WriteLine(rezhelper + "rez");
+                dividend -= rezhelper * right;
+                //Console.WriteLine(dividend + "divrest");
+                if (divhelper < left.cifre.Length)
+                {
+                    rez *= TEN;
+                    dividend *= TEN;
+                    dividend += new NumarMare(left.cifreint[divhelper].ToString());
+                }
+                divhelper++;
+            }
+            rezhelper = dividend.SimpleDiv(right);
+            dividend -= rezhelper * right;
+            //Console.WriteLine(rezhelper + "rez");
+            return dividend;
         }
         public static NumarMare operator /(NumarMare left, NumarMare right)
         {
-            NumarMare aux = ZERO;  // contor, adica catul operatiei.
-            NumarMare LeftAux;
-            NumarMare RightAux;
+            if(right == NULL || right == ZERO)
+            {
+                throw new DivideByZeroException();
+            }
             if (left.IsNegative && !right.IsNegative || !left.IsNegative && right.IsNegative)      // la fel ca la inmultire
             { 
                 return (right.Abs() / left.Abs()).Neg();
@@ -304,14 +387,50 @@ namespace Big_Integers
             {
                 return ZERO;
             }
-            LeftAux = left;
-            RightAux = right;
-            while (LeftAux - RightAux >= ZERO)                   // metoda lenesa, impartire prin scadere repetitive si incrementare contor
+            if (left < right)
             {
-                LeftAux = LeftAux - RightAux;                    // left - ( right + right + ... + right ) - de q ori.
-                aux += ONE;
+                return ZERO;
             }
-            return aux;
+            NumarMare rez = ZERO;
+            NumarMare dividend = ONE;
+            int divhelper = right.cifre.Length;
+
+                rez *= TEN;
+                bool firstdivdone = false;
+                int divlength = right.cifre.Length;              
+                NumarMare laux = left;
+                NumarMare rezhelper = ZERO;
+                StringBuilder str = new StringBuilder();
+                if (!firstdivdone)
+                {
+                    for (int i = 0; i < divlength; i++)
+                    {
+                        str.Append(laux.cifreint[i]);
+                    }
+                    dividend = new NumarMare(str.ToString());
+                    firstdivdone = true;
+                    //Console.WriteLine(dividend + "start");
+                }
+            while (divhelper <= left.cifre.Length)
+            {
+                rezhelper = dividend.SimpleDiv(right);
+                rez += rezhelper;
+                //Console.WriteLine(dividend + "prediv");
+                //Console.WriteLine(rezhelper + "rez");
+                dividend -= rezhelper * right;
+               // Console.WriteLine(dividend + "divrest");
+                if (divhelper < left.cifre.Length)
+                {
+                    rez *= TEN;
+                    dividend *= TEN;
+                    dividend += new NumarMare(left.cifreint[divhelper].ToString());                    
+                }
+                divhelper++;
+            }
+            rezhelper = dividend.SimpleDiv(right);
+            rez += rezhelper;
+           // Console.WriteLine(rezhelper + "rez");
+            return rez;          
         }
         public static bool operator >(NumarMare left, NumarMare right)
         {
@@ -331,13 +450,13 @@ namespace Big_Integers
             {
                 return true;
             }
-            else if (left.cifre.Length < right.cifre.Length)
-            {
+            if (left.cifre.Length < right.cifre.Length)
+            {   
                 return false;
             }
             else                                                    // verifica fiecare index de cifra in cazul in care ele au un nr egal de cifre.
             {
-                for (int i = left.cifre.Length - 1; i >= 0; i--)
+                for (int i = 0; i < left.cifre.Length; i++)
                 {
                     if (left.cifre[i] > right.cifre[i])
                     {
@@ -379,9 +498,9 @@ namespace Big_Integers
             {
                 return false;
             }
-            else // verifica fiecare cifra din tabloul de caractere de la spate ( aceste operatii au fost scrise la inceput inainte sa am un tablou de cifre inverse )
+            else                                                    // verifica fiecare index de cifra in cazul in care ele au un nr egal de cifre.
             {
-                for (int i = left.cifre.Length - 1; i >= 0; i--)
+                for (int i = 0; i < left.cifre.Length; i++)
                 {
                     if (left.cifre[i] > right.cifre[i])
                     {
@@ -491,6 +610,7 @@ namespace Big_Integers
             NumarMare Increment = ONE; // inmultire cu un numar care se incrementeaza in fiecare iteratie.
             for (int i = 1; i < f; i++)
             {
+                //Console.WriteLine(i);
                 Factorial = Factorial * (Increment + ONE); // factorial !(n+1) = n! * (n + 1)
                 Increment += ONE; // ii n-ul propriu zis.
             }
@@ -511,6 +631,25 @@ namespace Big_Integers
             NumarMare aux;
             aux = this;
             for (int i = 1; i < exp; i++)
+            {
+                aux = aux * this;
+            }
+            return aux;
+        }
+        /// <summary>
+        /// Functia putere cu exponent numar mare ( s-ar putea sa dureze foarte foarte mult un calcul de putere de peste 10000 )
+        /// </summary>
+        /// <param name="exp"></param>
+        /// <returns></returns>
+        public NumarMare Pow(NumarMare exp)
+        {
+            if (this == ZERO) // zero la orice putere ii 1
+            {
+                return ONE;
+            }
+            NumarMare aux;
+            aux = this;
+            for (NumarMare i = ONE; i < exp; i += ONE)
             {
                 aux = aux * this;
             }
@@ -539,6 +678,18 @@ namespace Big_Integers
             return checker - ONE; // while-ul face o iteratie in plus dar ii mai eficient asa decat sa verificam daca noua valoare este mai mare sau egala in fiecare iteratie.
 
         }
+        public NumarMare SimpleDiv(NumarMare right)
+        {
+            NumarMare LeftAux, RightAux, aux = ZERO;
+            LeftAux = this;
+            RightAux = right;
+            while (LeftAux - RightAux >= ZERO)                   // metoda lenesa, impartire prin scadere repetitive si incrementare contor
+            {
+                LeftAux = LeftAux - RightAux;                    // left - ( right + right + ... + right ) - de q ori.
+                aux += ONE;
+            }
+            return aux;
+        }
         /// <summary>
         /// Converts a NumarMare object to a string.
         /// </summary>
@@ -556,6 +707,115 @@ namespace Big_Integers
             }
             string s = str.ToString();
             return s;
+        }
+        public static NumarMare mult(NumarMare left, NumarMare right)
+        {
+            {
+                // bool operationNeg = false;
+                int subslength = left.cifre.Length;
+                if (left.cifre.Length < right.cifre.Length)             // uhhhh scaderea nu este comutativa astfel mi-am batut capul de pereti pana mi-am dat seama.
+                {                                                       // in cazul in care lungime b > lungime a : am nevoie ca nr cel mai lung sa fie in partea stanga pentru ca de lungimea lui se creeaza noul numar.
+                    if (left.IsNegative && !right.IsNegative)           // -a - b = -(b + |-a|) in cazul in care b > a
+                    {
+                        return (right + left.Abs()).Neg();
+                    }
+                    if (!left.IsNegative && right.IsNegative)           // a - -b = a + b ( nu conteaza ordinea deoarece + comutativ
+                    {
+                        return left + right.Abs();
+                    }
+                    if (left.IsNegative && right.IsNegative)           // -a - -b = |-b| - |-a| 
+                    {
+                        return right.Abs() - left.Abs();
+                    }
+                    if (!left.IsNegative && !right.IsNegative)         // a - b = -(b - a)
+                    {
+                        return (right - left).Neg();
+                    }
+                    subslength = right.cifre.Length;                   // in cazul in care ambele sunt pozitive trebuie sa iau lungimea celei din dreapta.
+                }
+                if (left < right)                                      // necesar pentru final, rezultatul este un nr pozitiv construit, si asta ii da semnul negativ
+                {
+                    return (right - left).Neg();
+                }                                                     // de aici lungimea a > lungime b 
+                if (left.IsNegative && !right.IsNegative)           // -a + b = -( |-a| + b )
+                {
+                    return (left.Abs() + right).Neg();
+                }
+                if (!left.IsNegative && right.IsNegative)           // a - -b = a + |-b|
+                {
+                    return left + right.Abs();
+                }
+                if (left.IsNegative && right.IsNegative)           // -a - -b = -(|-a| - |-b|)
+                {
+                    return (left.Abs() - right.Abs()).Neg();
+                }
+                // toate astea au fost necesar pentru ca nu pot stoca - ul din fata si operatiile lucreaza ca si cum ambele ar avea cifrele pozitive.
+                StringBuilder str = new StringBuilder();
+                while (subslength > 0)
+                {
+                    str.Append("0");
+                    subslength--;
+                }
+                NumarMare subs = new NumarMare(str.ToString());
+                //Console.WriteLine(subs);
+                for (int i = 0; i < subs.cifre.Length; i++)            // algoritmul de scadere a cifrelor in ordine inversa
+                {
+
+                    if (i >= right.cifre.Length)                               // aici nu mai are ca sa scada deci doar le adauga ce a mai ramas din nr mai lung
+                    {
+                        subs.cifrereversed[i] += left.cifrereversed[i];
+                        if (subs.cifrereversed[i] < 0)                          // check pentru borrow, se poate intampla maxim odata, daca e cazul.
+                        {
+                            subs.cifrereversed[i] += 10;
+                        }
+                        continue;
+                    }
+                    subs.cifrereversed[i] += left.cifrereversed[i] - right.cifrereversed[i];      // se scad cele doua numere 
+                    if (subs.cifrereversed[i] < 0)                                               // verificare pentru borrow
+                    {
+                        subs.cifrereversed[i] += 10;
+                        for (int j = i + 1; j < left.cifre.Length; j++)                        // algoritm pentru borrow pana cand e posibil, in cazul 100000 - 1, parcurge toate cifrele pana cand gaseste un borrow.
+                        {
+                            if (true)
+                            {
+                                subs.cifrereversed[j] -= 1;
+                                break;
+                            }
+                            //if (left.cifrereversed[j] - 1 >= 0)
+                            //{
+                            //    subs.cifrereversed[j] -= 1;
+                            //    break;
+                            //}
+                        }
+                    }
+                }
+                str = new StringBuilder();                                                              // construim numarul calculat
+                for (int i = 0; i < subs.cifrereversed.Length; i++)
+                {
+                    str.Append(subs.cifrereversed[i]);
+
+                }
+                //for (int i = 0; i < subs.cifrereversed.Length; i++)
+                //{
+                //    Console.Write(subs.cifrereversed[i]);
+                //}
+                //Console.WriteLine("c" + str.ToString());
+                //Console.WriteLine();
+                subs = new NumarMare(str.ToString());                      // aici numarul format are cifrele invers decat ce ne trebuie la rezultat
+                subs = subs.Normalize();                                  // normalizare in cazul in care sunt 0-uri nesemnificative in numar
+                                                                          //if (operationNeg)
+                                                                          //{
+                                                                          //    str = new StringBuilder();
+                                                                          //    str.Append('-');
+                                                                          //    str.Append(subs.ToString());
+                                                                          //    subs = new NumarMare(str.ToString());
+                                                                          //}
+                if (subs == NULL)         // daca a - b = 0 atunci numarul nu va contine nimic deci trebuie setat la 0.
+                {
+                    return ZERO;
+                }
+                return subs;
+            }
         }
     }
 }
