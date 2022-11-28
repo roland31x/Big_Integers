@@ -13,8 +13,8 @@ namespace Big_Integers
     {
         static void Main(string[] args)
         {
-            NumarMare a = new NumarMare("6");
-            NumarMare b = new NumarMare("-9");
+            NumarMare a = new NumarMare("532436546457567567657876878975677567654654756474565656658756785786724235432475645");
+            NumarMare b = new NumarMare("2534354");
             NumarMare f = new NumarMare("20");
             NumarMare f2 = new NumarMare("18");
             //Console.WriteLine(a.ToString());
@@ -25,18 +25,19 @@ namespace Big_Integers
             //Console.WriteLine(a.Equals(new NumarMare("1013")));
             Console.WriteLine(a);
             Console.WriteLine(b);
-            Console.WriteLine(a + b);
-            Console.WriteLine(b + a);
-            Console.WriteLine(b - a);
-            Console.WriteLine(a - b);
+            //Console.WriteLine(a + b);
+            //Console.WriteLine(b + a);
+            //Console.WriteLine(b - a);
+            //Console.WriteLine(a - b);
             //Console.WriteLine(b.Pow(2));
             //Console.WriteLine(a.Pow(2));
-           // Console.WriteLine(a.SimpleDiv(b));
             Console.WriteLine(a / b);
-           // Console.WriteLine(f - f2);
+            //Console.WriteLine(f - f2);
             Console.WriteLine(a % b);
+            //Console.WriteLine(a.Sqrt());
+            //Console.WriteLine(NumarMare.Factorial(1000));
             //Console.WriteLine(b.Pow(253));
-           // Console.WriteLine(b.Sqrt());
+            //Console.WriteLine(b.Sqrt());
         }
         
     }
