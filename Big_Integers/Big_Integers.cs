@@ -14,6 +14,7 @@ namespace Big_Integers
         readonly bool IsNegative;
         public static NumarMare ZERO = new NumarMare("0");
         public static NumarMare ONE = new NumarMare("1");
+        public static NumarMare TWO = new NumarMare("2");
         public static NumarMare TEN = new NumarMare("10");
         public static NumarMare NULL = new NumarMare("");
         public NumarMare(string s)
@@ -234,13 +235,6 @@ namespace Big_Integers
             //Console.WriteLine();
             subs = new NumarMare(str.ToString());                      // aici numarul format are cifrele invers decat ce ne trebuie la rezultat
             subs = subs.Normalize();                                  // normalizare in cazul in care sunt 0-uri nesemnificative in numar
-            //if (operationNeg)
-            //{
-            //    str = new StringBuilder();
-            //    str.Append('-');
-            //    str.Append(subs.ToString());
-            //    subs = new NumarMare(str.ToString());
-            //}
             if (subs == NULL)         // daca a - b = 0 atunci numarul nu va contine nimic deci trebuie setat la 0.
             {
                 return ZERO;
@@ -582,7 +576,7 @@ namespace Big_Integers
         /// Se foloseste in cazul operatiilor de adunare sau scadere pentru a elimina 0-uri nesemnificative din numar.
         /// </summary>
         /// <returns>Numarul fara 0-uri nesemnificative in fata, in urma unei operatii de adunare sau scadere.</returns>
-        public NumarMare Normalize()
+        private NumarMare Normalize()
         {
             StringBuilder str = new StringBuilder();
             bool started = false;                             // pentru a vedea de unde incepe numarul propriu zis
@@ -672,13 +666,23 @@ namespace Big_Integers
                 return ZERO;
             }
             NumarMare aux = this;
-            NumarMare checker = ONE;
-            while (checker.Pow(2) <= aux)
+            NumarMare st = ONE;
+            NumarMare dr = aux / TWO;
+            NumarMare mid = (st + dr) / TWO;
+            while (!(mid.Pow(2) <= aux && (mid + ONE).Pow(2) > aux))
             {
-                checker += ONE;
+                mid = (st + dr) / TWO;
+                if (mid.Pow(2) > aux)
+                {
+                    dr = mid - ONE;
+                    continue;
+                }
+                if(mid.Pow(2) < aux)
+                {
+                    st = mid + ONE;
+                }
             }
-            return checker - ONE; // while-ul face o iteratie in plus dar ii mai eficient asa decat sa verificam daca noua valoare este mai mare sau egala in fiecare iteratie.
-
+            return mid; 
         }
         private NumarMare SimpleDiv(NumarMare right)
         {
