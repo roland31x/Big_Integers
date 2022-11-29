@@ -12,6 +12,7 @@ namespace Big_Integers
         readonly int[] cifreint; // atribut 2 : cifrele ca int
         readonly int[] cifrereversed; // atribut 3 : cifrele ca int in ordine inversa pentru efectuarea calculelor
         readonly bool IsNegative;
+
         public static NumarMare ZERO = new NumarMare("0");
         public static NumarMare ONE = new NumarMare("1");
         public static NumarMare TWO = new NumarMare("2");
@@ -624,11 +625,16 @@ namespace Big_Integers
             {
                 return ONE;
             }
-            NumarMare aux;
-            aux = this;
-            for (int i = 1; i < exp; i++)
+            NumarMare a = this;
+            NumarMare aux = ONE;
+            while (exp > 0)
             {
-                aux = aux * this;
+                if(exp % 2 == 1)
+                {
+                    aux *= a;
+                }
+                exp /= 2;
+                a *= a;
             }
             return aux;
         }
@@ -643,11 +649,16 @@ namespace Big_Integers
             {
                 return ONE;
             }
-            NumarMare aux;
-            aux = this;
-            for (NumarMare i = ONE; i < exp; i += ONE)
+            NumarMare a = this;
+            NumarMare aux = ONE;
+            while (exp > ZERO)
             {
-                aux = aux * this;
+                if (exp % TWO == ONE)
+                {
+                    aux *= a;
+                }
+                exp /= TWO;
+                a *= a;
             }
             return aux;
         }
