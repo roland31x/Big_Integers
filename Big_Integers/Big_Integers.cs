@@ -621,9 +621,13 @@ namespace Big_Integers
         /// <returns>Un NumarMare ridicat la puterea EXP</returns>
         public NumarMare Pow(int exp)
         {
-            if (this == ZERO) // zero la orice putere ii 1
+            if (this == ZERO) // 0^x = 0, oricare x
             {
-                return ONE;
+                return ZERO;
+            }
+            if(exp == 0)
+            {
+                return ONE;   // x ^ 0 = 1, oricare x
             }
             NumarMare a = this;
             NumarMare aux = ONE;
@@ -645,9 +649,13 @@ namespace Big_Integers
         /// <returns></returns>
         public NumarMare Pow(NumarMare exp)
         {
-            if (this == ZERO) // zero la orice putere ii 1
+            if (this == ZERO) // 0^x = 0, oricare x
             {
-                return ONE;
+                return ZERO;
+            }
+            if (exp == ZERO)
+            {
+                return ONE;   // x ^ 0 = 1, oricare x
             }
             NumarMare a = this;
             NumarMare aux = ONE;

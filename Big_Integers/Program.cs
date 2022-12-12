@@ -2,10 +2,12 @@
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace Big_Integers
 {
@@ -13,7 +15,7 @@ namespace Big_Integers
     {
         static void Main(string[] args)
         {
-            NumarMare a = new NumarMare("7");
+            NumarMare a = new NumarMare("9999");
             NumarMare b = new NumarMare("2");
             NumarMare f = new NumarMare("4325433464565474567546754");
             NumarMare f2 = new NumarMare("18");
@@ -36,7 +38,7 @@ namespace Big_Integers
             //Console.WriteLine(a % b);
             //Console.WriteLine(a.Sqrt());
             //Console.WriteLine(NumarMare.Factorial(1000));
-            Console.WriteLine(a.Pow(a));
+            //Console.WriteLine(a.Pow(a));
             //Console.WriteLine(f.Sqrt());
             //Console.WriteLine(NumarMare.TWO.Pow(64));
         }
